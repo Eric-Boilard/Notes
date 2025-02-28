@@ -521,4 +521,156 @@ public class ContactAndLeadSearch {
     }
 }
 ```
+### Triggers
+
+Apex triggers enable you to perform custom actions before or after events to records in Salesforce, such as insertions, updates, or deletions.
+
+The syntax of a trigger definition is different from a class definition’s syntax. A trigger definition starts with the trigger keyword. It is then followed by the name of the trigger, the Salesforce object that the trigger is associated with, and the conditions under which it fires. A trigger has the following syntax:
+
+```Apex
+trigger TriggerName on ObjectName (trigger_events) {
+   code_block
+}
+```
+To execute a trigger before or after insert, update, delete, and undelete operations, specify multiple trigger events in a comma-separated list. The events you can specify are:
+
+* before insert
+* before update
+* before delete
+* after insert
+* after update
+* after delete
+* after undelete
+
+Simple trigger example:
+
+```Apex
+trigger HelloWorldTrigger on Account (before insert) {
+	System.debug('Hello World!');
+}
+```
+Be sure to add a record to the trigger the...trigger
+
+```Apex
+Account a = new Account(Name='Test Trigger');
+insert a;
+```
+There are two types of triggers.
+
+* Before triggers are used to update or validate record values before they’re saved to the database.
+* After triggers are used to access field values that are set by the system (such as a record's Id or LastModifiedDate field), and to affect changes in other records. The records that fire the after trigger are read-only.
+
+To access the records that caused the trigger to fire, use context variables. For example, Trigger.new contains all the records that were inserted in insert or update triggers. Trigger.old provides the old version of sObjects before they were updated in update triggers, or a list of deleted sObjects in delete triggers. Triggers can fire when one record is inserted, or when many records are inserted in bulk via the API or Apex. Therefore, context variables, such as Trigger.new, can contain only one record or multiple records. You can iterate over Trigger.new to get each individual sObject.
+
+Example:
+```Apex
+trigger HelloWorldTrigger on Account (before insert) {
+    for(Account a : Trigger.new) {
+        a.Description = 'New description';
+    }
+}
+```
+The system saves the records that fired the before trigger after the trigger finishes execution. You can modify the records in the trigger without explicitly calling a DML insert or update operation. If you perform DML statements on those records, you get an error.
+
+Some other context variables return a Boolean value to indicate whether the trigger was fired due to an update or some other event. These variables are useful when a trigger combines multiple events. For example:
+
+```Apex
+trigger ContextExampleTrigger on Account (before insert, after insert, after delete) {
+    if (Trigger.isInsert) {
+        if (Trigger.isBefore) {
+            // Process before insert
+        } else if (Trigger.isAfter) {
+            // Process after insert
+        }
+    }
+    else if (Trigger.isDelete) {
+        // Process after delete
+    }
+}
+```
+List of context variables can be found [here](https://trailhead.salesforce.com/content/learn/modules/apex_triggers/apex_triggers_intro?trailmix_creator_id=auser1343&trailmix_slug=platform-developer-bootcamp-prework)
+
+You can use triggers to call methods from classes as well:
+```Apex
+trigger ExampleTrigger on Contact (after insert, after delete) {
+    if (Trigger.isInsert) {
+        Integer recordCount = Trigger.new.size();
+        // Call a utility method from another class
+        EmailManager.sendMail('Your email address', 'Trailhead Trigger Tutorial',
+                    recordCount + ' contact(s) were inserted.');
+    }
+    else if (Trigger.isDelete) {
+        // Process after delete
+    }
+}
+```
+You sometimes need to add restrictions on certain database operations, such as preventing records from being saved when certain conditions are met. To prevent saving records in a trigger, call the addError() method on the sObject in question. The addError() method throws a fatal error inside a trigger. The error message is displayed in the user interface and is logged.
+
+Calling addError()in a trigger causes the entire set of operations to roll back, except when bulk DML is called with partial success.
+
+If a bulk DML call in the Lightning Platform API spawned the trigger, the runtime engine sets the bad records aside. The runtime engine then attempts a partial save of the records that did not generate errors.
+If a DML statement in Apex spawned the trigger, any error rolls back the entire operation. However, the runtime engine still processes every record in the operation to compile a comprehensive list of errors.
+
+Apex allows you to make calls to and integrate your Apex code with external Web services. Apex calls to external Web services are referred to as callouts. For example, you can make a callout to a stock quote service to get the latest quotes. When making a callout from a trigger, the callout must be done asynchronously so that the trigger process doesn’t block you from working while waiting for the external service's response. The asynchronous callout is made in a background process, and the response is received when the external service returns it.
+
+To make a callout from a trigger, call a class method that executes asynchronously. Such a method is called a future method and is annotated with @future(callout=true). This example class contains the future method that makes the callout.
+
+```Apex
+public class CalloutClass {
+    @future(callout=true)
+    public static void makeCallout() {
+        HttpRequest request = new HttpRequest();
+        // Set the endpoint URL.
+        String endpoint = 'http://yourHost/yourService';
+        request.setEndPoint(endpoint);
+        // Set the HTTP verb to GET.
+        request.setMethod('GET');
+        // Send the HTTP request and get the response.
+        HttpResponse response = new HTTP().send(request);
+    }
+}
+
+trigger CalloutTrigger on Account (before insert, before update) {
+    CalloutClass.makeCallout();
+}
+```
+
+### Bulk Apex Triggers
+
+Trigger that performs on a single sobject:
+```Apex
+trigger MyTriggerNotBulk on Account(before insert) {
+    Account a = Trigger.new[0];
+    a.Description = 'New description';
+}
+```
+Trigger that performs bulk:
+```Apex
+trigger MyTriggerBulk on Account(before insert) {
+    for(Account a : Trigger.new) {
+        a.Description = 'New description';
+    }
+}
+```
+Avoid putting SOQL queries in loops in triggers to avoid hitting limits.
+
+Example:
+```Apex
+trigger ClosedOpportunityTrigger on Opportunity (after insert, after update) {
+    List<Task> taskList = new List<Task>();
+    for(Opportunity opp : [SELECT Id FROM Opportunity WHERE ID IN:Trigger.New AND StageName='Closed Won']){
+        taskList.add(new task(Subject='Follow Up Test Task',WhatId=opp.id));
+    }
+    
+    insert taskList;
+}
+```
+
+
+
+
+
+
+
+
 
