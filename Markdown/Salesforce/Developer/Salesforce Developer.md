@@ -415,6 +415,14 @@ public class ContactSearch {
 }
 ```
 
+The relationship name inside the nested query uses the plural name Contacts, as opposed to Contact. This detail is important to understand, and it’s the part that usually trips people up. When working with relationship queries, the parent-to-child relationship name must be a plural name.
+
+```SQL
+SELECT Name, (Select FirstName, LastName FROM Contacts) FROM Account
+```
+
+
+
 ### SOSL Queries
 
 Salesforce Object Search Language (SOSL) is a Salesforce search language that is used to perform text searches in records. Use SOSL to search fields across multiple standard and custom object records in Salesforce. SOSL is similar to Apache Lucene.
@@ -503,4 +511,14 @@ Likewise, ordering results for one sObject is supported by adding ORDER BY for a
 
 The number of returned records can be limited to a subset of records. This example limits the returned accounts to 10 only: RETURNING Account(Name, Industry LIMIT 10).
 
+Challenge:
+
+```Apex
+public class ContactAndLeadSearch {
+    public static List<List<sObject>> searchContactsAndLeads(String str){
+       List<List<sObject>> searchList = [FIND :str IN ALL FIELDS RETURNING Contact(FirstName,LastName) ,Lead(FirstName,Lastname)];
+        return searchList;
+    }
+}
+```
 
