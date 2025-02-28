@@ -420,7 +420,7 @@ The relationship name inside the nested query uses the plural name Contacts, as 
 ```SQL
 SELECT Name, (Select FirstName, LastName FROM Contacts) FROM Account
 ```
-
+When working with custom objects, the relationship name is not only plural, but it is appended with two underscores and an r. For example, the relationship name for the custom object My_Object__c is My_Objects__r.
 
 
 ### SOSL Queries
