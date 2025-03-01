@@ -665,11 +665,70 @@ trigger ClosedOpportunityTrigger on Opportunity (after insert, after update) {
     insert taskList;
 }
 ```
+### Apex Compared to C#
 
+The basic syntax for defining classes is:
 
+```Apex
+private | public | global
+[virtual | abstract][with sharing | without sharing | inherited sharing]
+class ClassName [implements InterfaceNameList] [extends ClassName]
+{
+    // The body of the class
+}
+```
+Remember, an sObject is just a Salesforce object. You can think of it as a table in a database.
 
+Additionally, a data type can be a typed list of values, also known as an enum. But watch out, because these aren’t the same enums you’re used to working with in .NET. In Apex, you can use enums with numbers, but you can’t define what these number values are. Also, the ordinal assignment starts at zero.
 
+List
+A list is an ordered collection of elements that works much the same as a traditional array. However, Apex does not support arrays as collections, just lists. You can, however, use what’s known as “array notation” to reference specific items in a list using square brackets, [].  For example, the following is one way to declare a variable as a list of strings:
 
+```Apex
+List<String> myStrings =  new List<String>();
+```
+Alternatively, you can declare the myStrings list variable using square brackets, as in the following:
+```Apex
+String[] myStrings = new List<String>();
+```
+Another thing you can do is declare the list and initialize its values, all in one step, such as the following.
+```Apex
+List<String> myStrings =  new List<String> {'String1', 'String2', 'String3' };
+```
+
+```Apex
+public class AccountTriggerHandler {
+    public static void CreateAccounts(List<Account> acctList){
+        For (Account a : acctList){
+            if(a.ShippingState!=a.BillingState)
+             {
+                 a.ShippingState = a.BillingState;
+             }
+        }
+    }
+}
+
+trigger AccountTrigger on Account (before insert) {
+    if(Trigger.isBefore && Trigger.isInsert){
+        AccountTriggerHandler.CreateAccounts(Trigger.New);
+    } 
+}
+
+@isTest
+public class AccountTriggerTest {
+	 @isTest static void TestCreateNewAccountInBulk() {
+        List<Account> accts = new List<Account>();
+        for(Integer i=0; i < 200; i++) {
+            Account acct = new Account(Name='Test Account ' + i, BillingState = 'CA');
+            accts.add(acct);
+        }
+        Test.startTest();
+        insert accts;
+        Test.stopTest();  
+        System.assertEquals(200, [SELECT Count() FROM Account WHERE ShippingState = 'CA' ]);
+    }
+}
+```
 
 
 
