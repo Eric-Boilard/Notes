@@ -732,6 +732,50 @@ public class AccountTriggerTest {
 
 ### Apex Testing
 
+Apex tests must have at least 75% code coverage and also Apex can not be edited in a production Org.
+
+Test Method Syntax:
+```Apex
+@isTest static void testName() {
+  // code_block
+}
+```
+The visibility of a test method doesn’t matter, so declaring a test method as public or private doesn’t make a difference as the testing framework is always able to access test methods. For this reason, the access modifiers are omitted in the syntax.
+
+Test methods must be defined in test classes, which are classes annotated with @isTest. This sample class shows a definition of a test class with one test method.
+```Apex
+@isTest
+private class MyTestClass {
+  @isTest static void myTest() {
+    // code_block
+  }
+}
+```
+Test classes can be either private or public. If you’re using a test class for unit testing only, declare it as private. Public test classes are typically used for test data factory classes, which are covered later.
+
+The TemperatureConverterTest test class verifies that the method works as expected by calling it with different inputs for the temperature in Fahrenheit. Each test method verifies one type of input: a warm temperature, the freezing point temperature, the boiling point temperature, and a negative temperature. The verifications are done by calling the System.assertEquals() method, which takes two parameters: the first is the expected value, and the second is the actual value. There is another version of this method that takes a third parameter—a string that describes the comparison being done, which is used in testBoilingPoint(). This optional string is logged if the assertion fails.
+```Apex
+@isTest
+private class TemperatureConverterTest {
+  @isTest static void testWarmTemp() {
+    Decimal celsius = TemperatureConverter.FahrenheitToCelsius(70);
+    System.assertEquals(21.11,celsius);
+  }
+  @isTest static void testFreezingPoint() {
+    Decimal celsius = TemperatureConverter.FahrenheitToCelsius(32);
+    System.assertEquals(0,celsius);
+  }
+  @isTest static void testBoilingPoint() {
+    Decimal celsius = TemperatureConverter.FahrenheitToCelsius(212);
+    System.assertEquals(100,celsius,'Boiling point temperature is not expected.');
+  }
+  @isTest static void testNegativeTemp() {
+    Decimal celsius = TemperatureConverter.FahrenheitToCelsius(-10);
+    System.assertEquals(-23.33,celsius);
+  }
+}
+```
+
 
 
 
