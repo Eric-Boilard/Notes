@@ -94,5 +94,13 @@ in custom objects the foreign key is the name of the parent, example:
 SELECT Id, Course__c, Course__r.Name From Course_Delivery__c
 here Course__c exists in Course_Delivery__c object but the Course Name exists only on Course__c so we use Course__r.Name
 
-You can go 5 levels up from Chile to Parent
+You can go 5 levels up from Child to Parent
+
+Parent to Child
+
+the relationships are now plural
+before we went from Contact to Account and the relationship was the Account relations
+now we go from Account to Contact and the relationship is Contact(s). Plural! This is the only way to get to the child from the parent for standard objects.
+
+okay so before we went from Course_Deliveries__c to Course__c and the relationship was Course__r, now when we go from Course__c to Course_Delivery__c the relationship is Course_Deliveries__c. it becomes plural just like our other example.
 
